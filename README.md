@@ -10,3 +10,7 @@ getgenv().targethud = {
     backgroundTransparency = 0.3, -- Transparency of the outer box
 }
 ```
+## heres the loadstring dingalingaling
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Stratxgy/Lua-TargetHud/refs/heads/main/targethud.lua"))()
+```
