@@ -1,3 +1,11 @@
+-- Settings for the Target HUD
+getgenv().targethud = {
+    enabled = false, -- Toggle HUD on/off
+    maxDistance = 5, -- Maximum distance to detect targets
+    defaultHealthColor = Color3.fromRGB(128, 0, 128), -- Default health bar color (purple)
+    backgroundTransparency = 0.3, -- Transparency of the outer box
+}
+
 -- Target HUD Script (LocalScript)
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
@@ -7,104 +15,119 @@ local playerGui = player:WaitForChild("PlayerGui")
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = playerGui
 
--- Create the outer box (dark background)
+-- Create the outer box (background)
 local outerBox = Instance.new("Frame")
-outerBox.Size = UDim2.new(0, 200, 0, 120)  -- Height remains unchanged
-outerBox.Position = UDim2.new(0.5, -100, 0.8, -140)  -- Set Y to 0.8 to keep it on screen but below center (adjust YOffset as needed)
-outerBox.BackgroundColor3 = Color3.fromRGB(22, 22, 31)  -- Dark color: #16161f
-outerBox.BackgroundTransparency = 0.5
+outerBox.Size = UDim2.new(0, 200, 0, 120) -- Increased height for equipped item
+outerBox.Position = UDim2.new(0.5, -100, 0.8, -140) -- Centered horizontally
+outerBox.BackgroundColor3 = Color3.fromRGB(22, 22, 31) -- Dark gray
+outerBox.BackgroundTransparency = getgenv().targethud.backgroundTransparency -- Set transparency
+outerBox.BorderColor3 = Color3.fromRGB(80, 80, 80) -- Border color
+outerBox.BorderSizePixel = 1
 outerBox.Parent = screenGui
-outerBox.Visible = false
+outerBox.Visible = false -- Default hidden
 
--- Create the inner box (lighter background)
-local innerBox = Instance.new("Frame")
-innerBox.Size = UDim2.new(1, 0, 1, -20)  -- Slightly smaller than outerBox
-innerBox.Position = UDim2.new(0, 0, 0, 20)  -- Positioned inside the outer box
-innerBox.BackgroundColor3 = Color3.fromRGB(25, 25, 37)  -- Lighter color: #191925
-innerBox.BackgroundTransparency = 0.5
-innerBox.Parent = outerBox
+-- Create the header area (blank top bar)
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 20)
+header.Position = UDim2.new(0, 0, 0, 0)
+header.BackgroundColor3 = Color3.fromRGB(50, 50, 65) -- Slightly lighter gray
+header.BorderSizePixel = 0
+header.Parent = outerBox
 
--- Create the top line (colored #6759b3)
-local topLine = Instance.new("Frame")
-topLine.Size = UDim2.new(1, 0, 0, 5)
-topLine.Position = UDim2.new(0, 0, 0, 0)
-topLine.BackgroundColor3 = Color3.fromRGB(103, 89, 179)  -- Color: #6759b3
-topLine.Parent = outerBox
-
--- Create player's display name label
+-- Create the player's display name label
 local displayNameLabel = Instance.new("TextLabel")
-displayNameLabel.Size = UDim2.new(1, 0, 0, 20)
-displayNameLabel.Position = UDim2.new(0, 0, 0, 10)
-displayNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White font color
+displayNameLabel.Size = UDim2.new(1, -10, 0, 20)
+displayNameLabel.Position = UDim2.new(0, 5, 0, 20) -- Below the header
+displayNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
 displayNameLabel.BackgroundTransparency = 1
-displayNameLabel.Font = Enum.Font.SourceSans
+displayNameLabel.Font = Enum.Font.GothamBold
 displayNameLabel.TextSize = 14
 displayNameLabel.Text = ""
-displayNameLabel.Parent = innerBox
+displayNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+displayNameLabel.Parent = outerBox
 
--- Create the player's equipped item label
+-- Create the equipped item label
 local equippedItemLabel = Instance.new("TextLabel")
-equippedItemLabel.Size = UDim2.new(1, 0, 0, 20)
-equippedItemLabel.Position = UDim2.new(0, 0, 0, 30)  -- Positioned below the display name
-equippedItemLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White font color
+equippedItemLabel.Size = UDim2.new(1, -10, 0, 20)
+equippedItemLabel.Position = UDim2.new(0, 5, 0, 40) -- Positioned below the display name
+equippedItemLabel.TextColor3 = Color3.fromRGB(200, 200, 200) -- Slightly dimmed white
 equippedItemLabel.BackgroundTransparency = 1
-equippedItemLabel.Font = Enum.Font.SourceSans
+equippedItemLabel.Font = Enum.Font.Gotham
 equippedItemLabel.TextSize = 12
-equippedItemLabel.Text = "None"  -- Default text
-equippedItemLabel.Parent = innerBox
+equippedItemLabel.Text = "None"
+equippedItemLabel.TextXAlignment = Enum.TextXAlignment.Left
+equippedItemLabel.Parent = outerBox
 
--- Create health bar background
+-- Create the health bar background
 local healthBarBackground = Instance.new("Frame")
-healthBarBackground.Size = UDim2.new(0.9, 0, 0, 10)
-healthBarBackground.Position = UDim2.new(0.05, 0, 0, 60)  -- Moved down to avoid overlap with avatar
-healthBarBackground.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-healthBarBackground.Parent = innerBox
+healthBarBackground.Size = UDim2.new(0.9, 0, 0, 10) -- Slightly narrower for padding
+healthBarBackground.Position = UDim2.new(0.05, 0, 0, 70) -- Below the equipped item
+healthBarBackground.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Dark gray background
+healthBarBackground.BorderColor3 = Color3.fromRGB(80, 80, 80) -- Border color
+healthBarBackground.BorderSizePixel = 1
+healthBarBackground.Parent = outerBox
 
--- Create health bar (colored #800080)
+-- Create the health bar (foreground)
 local healthBar = Instance.new("Frame")
-healthBar.Size = UDim2.new(0, 100, 0, 10)
+healthBar.Size = UDim2.new(0.5, 0, 1, 0) -- Start at 50% health for testing
 healthBar.Position = UDim2.new(0, 0, 0, 0)
-healthBar.BackgroundColor3 = Color3.fromRGB(128, 0, 128)  -- Health bar color: #800080
+healthBar.BackgroundColor3 = getgenv().targethud.defaultHealthColor -- Use configurable color
+healthBar.BorderSizePixel = 0
 healthBar.Parent = healthBarBackground
 
--- Create the avatar image
+-- Create the health number label
+local healthNumberLabel = Instance.new("TextLabel")
+healthNumberLabel.Size = UDim2.new(1, 0, 1, 0) -- Fill the health bar background
+healthNumberLabel.Position = UDim2.new(0, 0, 0, 0)
+healthNumberLabel.BackgroundTransparency = 1
+healthNumberLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
+healthNumberLabel.Font = Enum.Font.Gotham
+healthNumberLabel.TextSize = 12
+healthNumberLabel.Text = "100%" -- Default value
+healthNumberLabel.TextXAlignment = Enum.TextXAlignment.Center
+healthNumberLabel.TextYAlignment = Enum.TextYAlignment.Center
+healthNumberLabel.Parent = healthBarBackground
+
+-- Create the player's avatar image
 local avatarImage = Instance.new("ImageLabel")
 avatarImage.Size = UDim2.new(0, 40, 0, 40)
-avatarImage.Position = UDim2.new(0, 10, 0, 10)
+avatarImage.Position = UDim2.new(1, -45, 0, -20) -- Top-right corner of the HUD
 avatarImage.BackgroundTransparency = 1
-avatarImage.Parent = innerBox
+avatarImage.Image = "" -- Placeholder for now
+avatarImage.Parent = outerBox
 
 -- Update the HUD when hovering over a player
 local function updateTargetHUD()
+    if not getgenv().targethud.enabled then
+        outerBox.Visible = false
+        return
+    end
+
     local targetPlayer = nil
     local targetCharacter = nil
     local targetHumanoid = nil
-    local targetHead = nil
 
     -- Check if the mouse is hovering over a player
     for _, otherPlayer in pairs(game.Players:GetPlayers()) do
         if otherPlayer.Character and otherPlayer.Character:FindFirstChild("Head") then
             local head = otherPlayer.Character.Head
             local distance = (mouse.Hit.p - head.Position).magnitude
-            
-            -- Adjust the distance for when the HUD shows up (set a smaller range, e.g. 5 studs)
-            if distance < 5 then  -- Reduced the distance threshold
+
+            if distance < getgenv().targethud.maxDistance then -- Use configurable distance
                 targetPlayer = otherPlayer
                 targetCharacter = otherPlayer.Character
                 targetHumanoid = targetCharacter:FindFirstChild("Humanoid")
-                targetHead = head
                 break
             end
         end
     end
 
-    -- If the mouse is hovering over a player
     if targetPlayer and targetHumanoid then
-        -- Show the HUD and update the player's display name
+        -- Show the HUD and update display name
         outerBox.Visible = true
-        displayNameLabel.Text = targetPlayer.DisplayName
+        displayNameLabel.Text = string.format("%s (%s)", targetPlayer.DisplayName, targetPlayer.Name)
 
-        -- Update the equipped item label
+        -- Update equipped item
         local equippedTool = targetPlayer.Character:FindFirstChildOfClass("Tool")
         if equippedTool then
             equippedItemLabel.Text = equippedTool.Name
@@ -112,11 +135,12 @@ local function updateTargetHUD()
             equippedItemLabel.Text = "None"
         end
 
-        -- Update the health bar based on the Humanoid's health
-        local healthPercentage = targetHumanoid.Health / targetHumanoid.MaxHealth
+        -- Update health bar and health number
+        local healthPercentage = math.clamp(targetHumanoid.Health / targetHumanoid.MaxHealth, 0, 1)
         healthBar.Size = UDim2.new(healthPercentage, 0, 1, 0)
+        healthNumberLabel.Text = string.format("%d%%", math.floor(healthPercentage * 100))
 
-        -- Update the avatar picture
+        -- Update avatar image
         local avatarId = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. targetPlayer.UserId .. "&width=420&height=420&format=png"
         avatarImage.Image = avatarId
     else
