@@ -1,7 +1,6 @@
-# Lua-TargetHud
-lua targethud mainly for dh / dh customs but works in most (all if the game has no custom models) roblox games.
+## Feel free to use this in a script.
 
-## for you skids here are the settings
+## Settings
 ```lua
 getgenv().targethud = {
     enabled = false, -- Toggle HUD on/off
@@ -10,7 +9,7 @@ getgenv().targethud = {
     backgroundTransparency = 0.3, -- Transparency of the outer box
 }
 ```
-## heres the loadstring
+## Load Target Hud
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Stratxgy/Lua-TargetHud/refs/heads/main/targethud.lua"))()
 ```
