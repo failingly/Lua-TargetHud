@@ -17,7 +17,7 @@ screenGui.Parent = playerGui
 
 -- Create the outer box (background)
 local outerBox = Instance.new("Frame")
-outerBox.Size = UDim2.new(0, 200, 0, 120) -- Increased height for equipped item
+outerBox.Size = UDim2.new(0, 200, 0, 120) -- Default size
 outerBox.Position = UDim2.new(0.5, -100, 0.8, -140) -- Centered horizontally
 outerBox.BackgroundColor3 = Color3.fromRGB(22, 22, 31) -- Dark gray
 outerBox.BackgroundTransparency = getgenv().targethud.backgroundTransparency -- Set transparency
@@ -25,6 +25,12 @@ outerBox.BorderColor3 = Color3.fromRGB(80, 80, 80) -- Border color
 outerBox.BorderSizePixel = 1
 outerBox.Parent = screenGui
 outerBox.Visible = false -- Default hidden
+outerBox.ClipsDescendants = true -- Ensures round corners are clipped
+
+-- Apply rounded corners
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10) -- Adjust to make the corners rounder
+corner.Parent = outerBox
 
 -- Create the header area (blank top bar)
 local header = Instance.new("Frame")
@@ -36,7 +42,7 @@ header.Parent = outerBox
 
 -- Create the player's display name label
 local displayNameLabel = Instance.new("TextLabel")
-displayNameLabel.Size = UDim2.new(1, -10, 0, 20)
+displayNameLabel.Size = UDim2.new(0, 150, 0, 20) -- Default width
 displayNameLabel.Position = UDim2.new(0, 5, 0, 20) -- Below the header
 displayNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
 displayNameLabel.BackgroundTransparency = 1
@@ -126,6 +132,10 @@ local function updateTargetHUD()
         -- Show the HUD and update display name
         outerBox.Visible = true
         displayNameLabel.Text = string.format("%s (%s)", targetPlayer.DisplayName, targetPlayer.Name)
+
+        -- Adjust the width of the display name label based on the length of the username
+        local displayNameLength = displayNameLabel.TextBounds.X
+        outerBox.Size = UDim2.new(0, math.max(200, displayNameLength + 30), 0, 120)
 
         -- Update equipped item
         local equippedTool = targetPlayer.Character:FindFirstChildOfClass("Tool")
